@@ -1,0 +1,184 @@
+---
+title: "Análisis exploratorio y modelado"
+format: html
+editor: visual
+---
+
+```{r}
+library(readr)
+df_airbnb_cleansed <- read_csv("Documents/Bootcamp/PROYECTO FINAL/df_airbnb_cleansed.csv")
+View(df_airbnb_cleansed)
+```
+
+```{r}
+problems(df_airbnb_cleansed)
+```
+
+```{r}
+summary(df_airbnb_cleansed)
+```
+
+```{r}
+library(dplyr)
+df_airbnb_work <- dplyr::select(df_airbnb_cleansed,"ID","HOST_ID","NEIGHBOURHOOD_CLEANSED","ZIPCODE","LATITUDE","LONGITUDE","PROPERTY_TYPE","ROOM_TYPE","ACCOMMODATES","BATHROOMS","BEDROOMS","BEDS","BED_TYPE","PRICE","SECURITY_DEPOSIT","CLEANING_FEE","MINIMUM_NIGHTS","NUMBER_OF_REVIEWS","REVIEW_SCORES_RATING","REVIEW_SCORES_ACCURACY","REVIEW_SCORES_CLEANLINESS","REVIEW_SCORES_CHECKIN","REVIEW_SCORES_COMMUNICATION","REVIEW_SCORES_LOCATION","REVIEW_SCORES_VALUE","CANCELLATION_POLICY","CALCULATED_HOST_LISTINGS_COUNT","REVIEWS_PER_MONTH","PRICE_PER_PERSON","RATIO_BEDS_PERS","RATIO_ROOMS_PERS","RATIO_NVECES_ALQUILADO","SECURITY_DEPOSIT_BOOL")
+
+```
+
+```{r}
+# Elimino NA en precio
+ df_airbnb_work <- df_airbnb_work[!is.na(df_airbnb_work$PRICE),]
+
+```
+
+```{r}
+# Elimino NA en precio
+ df_airbnb_work <- df_airbnb_work[!is.na(df_airbnb_work$BEDROOMS),]
+
+```
+
+```{r}
+summary(df_airbnb_work$BEDROOMS)
+
+```
+
+```{r}
+# Hay habitación que salen a 0. Supongo que son apartamentos/loft sin habitación propia pero es una estancia. Lo voy a contar como 1. Reemplazo los 0 de habitación a 1 y vuelvo a calcular.
+df_airbnb_work$BEDROOMS <- replace(df_airbnb_work$BEDROOMS, df_airbnb_work$BEDROOMS == 0, 1)
+```
+
+```{r}
+summary(df_airbnb_work$BEDROOMS)
+
+```
+
+```{r}
+num_viviendas <- nrow(df_airbnb_work)
+avg_price <- mean(df_airbnb_work$PRICE)
+avg_unit_price <- mean(df_airbnb_work$PRICE_PER_PERSON)
+
+paste("El número total de viviendas es:", num_viviendas)
+paste("El precio medio diario de todas las viviendas es:", avg_price)
+paste("El precio medio diario por persona de todas las viviendas es:", avg_unit_price)
+```
+
+```{r}
+# Añado un precio por habitación. 
+
+df_airbnb_work$PRICE_PER_BEDROOMS <- df_airbnb_work$PRICE/df_airbnb_work$BEDROOMS
+
+```
+
+```{r}
+
+df_airbnb_work$PERS_PER_BEDROOMS <- df_airbnb_work$ACCOMMODATES/df_airbnb_work$BEDROOMS
+```
+
+```{r}
+library(dplyr)
+hosts <- df_airbnb_work |> group_by(HOST_ID) |>  summarise(avg_price=mean(PRICE),
+            total_houses= sum(CALCULATED_HOST_LISTINGS_COUNT), madrid_houses = n())
+hosts
+
+```
+
+```{r}
+df_airbnb_work$PRO_HOST <- (df_airbnb_work$CALCULATED_HOST_LISTINGS_COUNT > 3) == TRUE
+```
+
+```{r}
+
+group_property <- df_airbnb_work |> group_by(PROPERTY_TYPE) |> 
+  summarise(n_houses = n(),avg_price=mean(PRICE),med_price=median(PRICE),avg_rooms = mean(BEDROOMS), avg_unit_rooms = mean(RATIO_ROOMS_PERS),avg_unit_price = mean(PRICE_PER_PERSON),)
+
+print(group_property)
+
+# La mayoría de las casas se concentran en pocos tipos de propiedades.
+```
+
+```{r}
+
+# Si cuento por tipo de propiedad y filtro las que tenga más de 50, solo se quedan 6 tipos de propiedas y la mayoría está en apartamento.
+library(ggplot2)
+group_property <- group_property[group_property$n_houses>50,]
+ggplot(group_property, aes(x=PROPERTY_TYPE, y=n_houses))+geom_col()
+```
+```{r}
+library(ggplot2)
+
+ggplot(df_airbnb_work, aes(BEDROOMS, PRICE, colour = ZIPCODE)) + 
+  geom_point()
+```
+
+
+
+```{r}
+boxplot(df_airbnb_work$PRICE)
+# Tengo muchos outliers.
+```
+```{r}
+df_airbnb_under_200 <- df_airbnb_work |> filter(PRICE<140)
+```
+
+
+```{r}
+boxplot(df_airbnb_under_200$PRICE)
+
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(df_airbnb_under_200, aes(BEDROOMS, PRICE, colour = ZIPCODE)) + 
+  geom_point()
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(df_airbnb_under_200, aes(RATIO_ROOMS_PERS,PERS_PER_BEDROOMS, colour = ZIPCODE)) + 
+  geom_point()
+```
+
+
+```{r}
+est_price <- df_airbnb_under_200[,c('PRICE', 'ZIPCODE','ACCOMMODATES','SECURITY_DEPOSIT','NUMBER_OF_REVIEWS','REVIEW_SCORES_RATING','CANCELLATION_POLICY')]
+
+library(GGally)
+ggpairs(est_price[,c('PRICE', 'ZIPCODE','ACCOMMODATES','SECURITY_DEPOSIT','NUMBER_OF_REVIEWS','REVIEW_SCORES_RATING','CANCELLATION_POLICY')],
+lower = list(continuous = wrap("points", alpha = 0.3,size=0.3,color='blue'))
+) 
+
+```
+
+
+```{r}
+est_price_1 <- df_airbnb_under_200[,c('PRICE','ACCOMMODATES','SECURITY_DEPOSIT','REVIEW_SCORES_RATING','BEDROOMS','BATHROOMS','BEDS','MINIMUM_NIGHTS','REVIEWS_PER_MONTH')]
+
+library(GGally)
+ggpairs(est_price_1[,c('PRICE', 'ACCOMMODATES','SECURITY_DEPOSIT','REVIEW_SCORES_RATING','BEDROOMS','BATHROOMS','BEDS','MINIMUM_NIGHTS','REVIEWS_PER_MONTH')],
+lower = list(continuous = wrap("points", alpha = 0.3,size=0.3,color='blue'))
+) 
+
+```
+
+
+
+```{r}
+model_0 <- lm(data=est_price_1, formula = PRICE ~ ACCOMMODATES+REVIEW_SCORES_RATING+SECURITY_DEPOSIT+BEDROOMS+BEDS)
+summary(model_0)
+```
+
+
+```{r}
+est_price_unit <- df_airbnb_under_200[,c('PRICE_PER_PERSON','RATIO_ROOMS_PERS')]
+
+library(GGally)
+ggpairs(est_price_unit[,c('PRICE_PER_PERSON','RATIO_ROOMS_PERS' )],
+lower = list(continuous = wrap("points", alpha = 0.3,size=0.3,color='blue'))
+) 
+
+```
+```{r}
+model_unit <- lm(data=est_price_unit, formula = PRICE_PER_PERSON ~ RATIO_ROOMS_PERS)
+summary(model_unit)
+```
