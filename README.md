@@ -1,4 +1,5 @@
-# PROYECTO FINAL BOOTCAMP PROGRAMACIÓN Y BIG DATA MUJERES IN TECH KEEPCODING & GLOVO
+# PROYECTO FINAL BOOTCAMP PROGRAMACIÓN Y BIG DATA MUJERES IN TECH KEEPCODING & GLOVO:
+# *Análisis, visualización, exploración y modelado de los datos de Airbnb en Madrid: determinación de la relación entre precio y variables predictivas*
 
 ## AUTORAS
 
