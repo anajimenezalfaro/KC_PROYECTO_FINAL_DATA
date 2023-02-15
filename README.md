@@ -7,7 +7,7 @@
 * Jiménez-Alfaro Ayala, Ana 
 * Jiménez González, Laura 
 * Manrique Savasta, Emely 
-* Montero Martínez, Liliana 
+* Montenegro Martínez, Liliana 
 
 ## OBJETIVO 
 
