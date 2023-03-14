@@ -19,7 +19,7 @@ Se ha trabajado con un conjunto de datos que contiene información sobre los alo
 
 ## DAHBOARD TABLEAU PUBLIC
 
-[(https://public.tableau.com/views/Trabajo_Final_Tableau_Final/DASHBOARD?:language=en-US&:display_count=n&:origin=viz_share_link)] 
+https://public.tableau.com/views/Trabajo_Final_Tableau_Final/DASHBOARD?:language=en-US&:display_count=n&:origin=viz_share_link
 
 
 ## DIAGRAMA ENTIDAD RELACIÓN
